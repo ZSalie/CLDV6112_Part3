@@ -1,0 +1,37 @@
+﻿@startuml foo
+
+!theme metal
+
+entity Venue {
+    * VenueID
+    ---
+    * Capacity
+    * Location
+    * VenueName
+    
+}
+entity Event {
+    * EventID
+    ---
+    * Capacity 
+    * Event Name
+}
+entity Booking {
+    * BookingID
+    ---
+    * start date
+    * end date 
+    
+}
+entity User {
+    * UserID
+    ---
+    * User Name
+    * User Email
+    * User Password
+}
+
+Venue ||--o{ Booking
+Event ||--o{ Booking
+
+@enduml

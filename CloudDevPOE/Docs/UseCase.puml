@@ -1,0 +1,42 @@
+﻿@startuml
+
+!theme metal
+left to right direction
+
+
+actor "Booking Specialist" as Agent
+
+usecase "List Venue Bookings" as UC1
+usecase "Manage Venue Booking" as UC2
+usecase "Create Venue Booking" as UC3
+usecase "Load an event" as UC4
+usecase "List Events" as UC5
+usecase "Manage Event" as UC6
+usecase "Log onto System" as UC7
+usecase "Log out of System" as UC8
+usecase "Upload images to event gallery" as UC9
+usecase "Create Venue" as UC10
+usecase "Manage Venue" as UC11
+
+note "search and filter capabilities required" as N1
+note "Constraint: cannot be deleted if there is an existing booking" as N2
+
+Agent --> UC1
+Agent --> UC2
+Agent --> UC3
+Agent --> UC4
+Agent --> UC5
+Agent --> UC6
+Agent --> UC7
+Agent --> UC8
+Agent --> UC9
+Agent --> UC10
+Agent --> UC11
+N1 .. UC1
+N2 .. UC11
+N2 .. UC6
+@enduml
+
+
+
+
