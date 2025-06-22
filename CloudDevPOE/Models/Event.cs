@@ -20,5 +20,6 @@ namespace CloudDevPOE.Models
         public Venue? Venue { get; set; }  // Nullable
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public EventType Type { get; set; } = null!;
     }
 }
