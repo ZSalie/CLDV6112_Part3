@@ -11,7 +11,7 @@ namespace CloudDevPOE.Models
         public int VenueId { get; set; }
 
         [Required(ErrorMessage = "Venue Name is required.")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "Venue Name must be between 3 and 100 characters.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Venue Name must be between 2 and 100 characters.")]
         public string Name { get; set; } = null!;
 
         [Required(ErrorMessage = "Location is required.")]
@@ -19,13 +19,17 @@ namespace CloudDevPOE.Models
         public string Location { get; set; } = null!;
 
         [Required(ErrorMessage = "Capacity is required.")]
-        [Range(1, 10000, ErrorMessage = "Capacity must be between 1 and 100,000.")]
+        [Range(1, 100000, ErrorMessage = "Capacity must be between 1 and 100,000.")]
         public int Capacity { get; set; }
 
+        [Required(ErrorMessage = "Venue availability must be specified.")]
+        public bool IsAvailable { get; set; } = true;
+
         [NotMapped]
-        public IFormFile? ImageFile { get; set; }  // Upload
+        public IFormFile? ImageFile { get; set; }
+
         [NotMapped]
-        public String? ImageBase64 { get; set; } // Download
+        public string? ImageBase64 { get; set; }
 
         [Required(ErrorMessage = "Creation Date is required.")]
         [DataType(DataType.Date, ErrorMessage = "Please enter a valid date.")]

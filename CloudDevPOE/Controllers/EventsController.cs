@@ -22,7 +22,10 @@ namespace CloudDevPOE.Controllers
         // GET: Events
         public async Task<IActionResult> Index()
         {
-            var events = await _context.Event.Include(e => e.Venue).ToListAsync();
+            var events = await _context.Event
+                .Include(e => e.Venue)
+                .Include(e => e.EventType)
+                .ToListAsync();
 
             // Ensure correct date-time formatting in the model before passing to view
             events.ForEach(e =>
@@ -30,6 +33,9 @@ namespace CloudDevPOE.Controllers
                 e.StartDate = e.StartDate.ToLocalTime();
                 e.EndDate = e.EndDate.ToLocalTime();
             });
+
+            var eventTypes = await _context.EventType.ToListAsync();
+            ViewBag.EventTypes = new SelectList(eventTypes, "id", "description");
 
             return View(events);
         }
@@ -61,21 +67,20 @@ namespace CloudDevPOE.Controllers
         public IActionResult Create()
         {
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name");
+            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description");
             return View();
         }
 
         // POST: Events/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EventId,Name,Description,StartDate,EndDate,VenueId")] Event @event)
+        public async Task<IActionResult> Create([Bind("EventId,Name,Description,StartDate,EndDate,VenueId,EventTypeId")] Event @event)
         {
             if (ModelState.IsValid)
             {
-                // Ensure both StartDate and EndDate store time components
                 @event.StartDate = @event.StartDate.ToLocalTime();
                 @event.EndDate = @event.EndDate.ToLocalTime();
 
-                // Check if venue is already booked for another event on the same day
                 bool hasConflict = await _context.Event.AnyAsync(e => e.VenueId == @event.VenueId &&
                     e.StartDate.Date == @event.StartDate.Date);
 
@@ -92,6 +97,7 @@ namespace CloudDevPOE.Controllers
             }
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
+            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
             return View(@event);
         }
 
@@ -109,18 +115,18 @@ namespace CloudDevPOE.Controllers
                 return NotFound();
             }
 
-            // Ensure correct time handling before editing
             @event.StartDate = @event.StartDate.ToLocalTime();
             @event.EndDate = @event.EndDate.ToLocalTime();
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
+            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
             return View(@event);
         }
 
         // POST: Events/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EventId,Name,Description,StartDate,EndDate,VenueId")] Event @event)
+        public async Task<IActionResult> Edit(int id, [Bind("EventId,Name,Description,StartDate,EndDate,VenueId,EventTypeId")] Event @event)
         {
             if (id != @event.EventId)
             {
@@ -131,11 +137,9 @@ namespace CloudDevPOE.Controllers
             {
                 try
                 {
-                    // Ensure StartDate and EndDate store time components correctly
                     @event.StartDate = @event.StartDate.ToLocalTime();
                     @event.EndDate = @event.EndDate.ToLocalTime();
 
-                    // Prevent double bookings on the same date for the same venue
                     bool hasConflict = await _context.Event.AnyAsync(e => e.VenueId == @event.VenueId &&
                         e.EventId != @event.EventId &&
                         e.StartDate.Date == @event.StartDate.Date);
@@ -165,6 +169,7 @@ namespace CloudDevPOE.Controllers
             }
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
+            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
             return View(@event);
         }
 
@@ -200,22 +205,65 @@ namespace CloudDevPOE.Controllers
                 {
                     ViewBag.Message = "You cannot delete this as there are bookings for this event";
                     return View(@event);
-
                 }
                 else
                 {
                     _context.Event.Remove(@event);
                     await _context.SaveChangesAsync();
-
                 }
             }
 
             return RedirectToAction(nameof(Index));
         }
 
+        // ?? GET: Events/Filter
+        public async Task<IActionResult> Filter(int? eventTypeId, DateTime? startDate, DateTime? endDate)
+        {
+            var query = _context.Event
+                .Include(e => e.EventType)
+                .Include(e => e.Venue)
+                .Where(e => e.Venue.IsAvailable);
+
+            if (eventTypeId.HasValue)
+                query = query.Where(e => e.EventTypeId == eventTypeId);
+
+            if (startDate.HasValue)
+                query = query.Where(e => e.StartDate >= startDate);
+
+            if (endDate.HasValue)
+                query = query.Where(e => e.EndDate <= endDate);
+
+            var filteredEvents = await query.ToListAsync();
+
+            filteredEvents.ForEach(e =>
+            {
+                e.StartDate = e.StartDate.ToLocalTime();
+                e.EndDate = e.EndDate.ToLocalTime();
+            });
+
+            ViewData["EventTypes"] = new SelectList(await _context.EventType.ToListAsync(), "EventTypeId", "Description");
+            return View("Index", filteredEvents);
+        }
+
         private bool EventExists(int id)
         {
             return _context.Event.Any(e => e.EventId == id);
+        }
+        //Search Function
+        public async Task<IActionResult> Search(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return View("Index", await _context.Event.Include(b => b.EventType).Include(e => e.Venue).ToListAsync());
+            }
+
+            var results = await _context.Event
+                .Include(b => b.EventType)
+                .Include(e => e.Venue)
+                .Where(b => b.Name.Contains(searchQuery))
+                .ToListAsync();
+
+            return View("Index", results);
         }
     }
 }
