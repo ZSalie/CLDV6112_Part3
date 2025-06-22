@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-public class AzureBlobStorageService : IAzureBlobStorageService
+public class AzureBlobStorageRepository : IImageRepository
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly string _containerName;
 
-    public AzureBlobStorageService(IConfiguration configuration)
+    public AzureBlobStorageRepository(IConfiguration configuration)
     {
         var connectionString = configuration["ConnectionStrings:ImageBlobStorage"];
         _containerName = "eventease-images";
@@ -33,7 +33,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
             BinaryData binaryData = new BinaryData(buffer);*/
 
             fileStream.Position = 0;
-            await blobClient.UploadAsync(fileStream,true);
+            await blobClient.UploadAsync(fileStream, true);
 
             return blobClient.Uri.ToString();
         }
@@ -76,7 +76,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         }
     }
 
-    public async Task<List<string>> ListImagesAsync()
+    public async Task<IEnumerable<string>> ListImagesAsync()
     {
         try
         {
@@ -88,7 +88,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
                 imageList.Add(blobItem.Name);
             }
 
-            return imageList;
+            return imageList.AsEnumerable<string>();
         }
         catch (Exception ex)
         {

@@ -1,8 +1,8 @@
 ﻿
-public interface IAzureBlobStorageService
+public interface IImageRepository
 {
     Task<bool> DeleteImageAsync(string fileName);
     Task<Stream> DownloadImageAsync(string fileName);
-    Task<List<string>> ListImagesAsync();
+    Task<IEnumerable<string>> ListImagesAsync();
     Task<string> UploadImageAsync(Stream fileStream, string fileName);
 }

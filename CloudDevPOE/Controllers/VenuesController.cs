@@ -16,12 +16,12 @@ namespace CloudDevPOE.Controllers
     public class VenuesController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IAzureBlobStorageService _azureBlobStorageService;
+        private readonly IImageRepository _imageRepository;
 
 
-        public VenuesController(AppDbContext context,IAzureBlobStorageService azureBlobStorageService)
+        public VenuesController(AppDbContext context, IImageRepository imageRepository)
         {
-            _azureBlobStorageService = azureBlobStorageService;
+            _imageRepository = imageRepository;
             _context = context;
         }
 
@@ -32,7 +32,7 @@ namespace CloudDevPOE.Controllers
 
             venues.ForEach( v =>
             {
-                var fileStream =  _azureBlobStorageService.DownloadImageAsync(v.VenueId.ToString()).Result;
+                var fileStream = _imageRepository.DownloadImageAsync(v.VenueId.ToString()).Result;
                 byte[] imageBytes = new byte[fileStream.Length];
                 fileStream.ReadExactly(imageBytes);
                 v.ImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
@@ -61,7 +61,7 @@ namespace CloudDevPOE.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     await venue.ImageFile.CopyToAsync(memoryStream);
-                    await _azureBlobStorageService.UploadImageAsync(memoryStream, venue.VenueId.ToString());
+                    await _imageRepository.UploadImageAsync(memoryStream, venue.VenueId.ToString());
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -105,7 +105,7 @@ namespace CloudDevPOE.Controllers
                     using (var memoryStream = new MemoryStream())
                     {
                         await venue.ImageFile.CopyToAsync(memoryStream);
-                        await _azureBlobStorageService.UploadImageAsync(memoryStream, venue.VenueId.ToString());
+                        await _imageRepository.UploadImageAsync(memoryStream, venue.VenueId.ToString());
                     }
                 }
                 catch (DbUpdateConcurrencyException)
