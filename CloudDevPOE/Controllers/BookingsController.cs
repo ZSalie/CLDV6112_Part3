@@ -22,8 +22,13 @@ namespace CloudDevPOE.Controllers
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Booking.Include(b => b.Event);
-            return View(await appDbContext.ToListAsync());
+            var bookings = await  _context.Booking
+                .Include(b => b.Event)
+                .ToListAsync();
+
+            ViewData["FilterEventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
+
+            return View( bookings);
         }
 
         // GET: Bookings/Details/5
@@ -176,6 +181,42 @@ namespace CloudDevPOE.Controllers
 
             return View("Index", results);
         }
+        public async Task<IActionResult> Filter(string? filterName, int? filterEventType, DateTime? filterStartDate, DateTime? filterEndDate)
+        {
+            var query = _context.Booking
+                .Include(b => b.Event)
+                .AsQueryable();
+                
+               
+            if (!string.IsNullOrWhiteSpace(filterName))
+                query = query.Where(b => b.CustomerName!.Contains(filterName));
+
+            if (filterEventType.HasValue)
+                query = query.Where(b => b.Event!.EventTypeId == filterEventType);
+
+            if (filterStartDate.HasValue && filterEndDate.HasValue)
+                query = query.Where(b => b.BookingDate >= filterStartDate && b.BookingDate <= filterEndDate);
+
+            var filteredBookings = await query.ToListAsync();
+
+            // filteredEvents.ForEach(e =>
+            // {
+            //     e.StartDate = e.StartDate.ToLocalTime();
+            //     e.EndDate = e.EndDate.ToLocalTime();
+            // });
+
+            //ViewData["BookingId"] = new SelectList(_context.Booking, "BookingId", "Name");
+            ViewData["FilterEventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
+
+            return View("Index", filteredBookings);
+        }
+
+        public async Task<IActionResult> ClearFilter()
+        {
+            // Clear the filter parameters and redirect to Index
+            return await Task.FromResult(RedirectToAction(nameof(Index)));
+        }
+
     }
-    
+
 }
