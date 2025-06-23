@@ -25,14 +25,13 @@ namespace CloudDevPOE.Models
         [Required(ErrorMessage = "Venue selection is required.")]
         public int VenueId { get; set; }
 
-        public Venue? Venue { get; set; }  // Nullable as originally written
+        public Venue? Venue { get; set; }
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
         [Required(ErrorMessage = "Event type is required.")]
         public int EventTypeId { get; set; }
+        public EventType? EventType { get; set; }
 
-        public EventType? EventType { get; set; } = null!;
-        
     }
 }

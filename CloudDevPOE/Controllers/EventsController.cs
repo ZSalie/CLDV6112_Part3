@@ -34,8 +34,8 @@ namespace CloudDevPOE.Controllers
                 e.EndDate = e.EndDate.ToLocalTime();
             });
 
-            var eventTypes = await _context.EventType.ToListAsync();
-            ViewBag.EventTypes = new SelectList(eventTypes, "id", "description");
+
+            ViewData["FilterEventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
 
             return View(events);
         }
@@ -67,7 +67,7 @@ namespace CloudDevPOE.Controllers
         public IActionResult Create()
         {
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name");
-            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description");
+            ViewData["EventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
             return View();
         }
 
@@ -97,7 +97,7 @@ namespace CloudDevPOE.Controllers
             }
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
-            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
+            ViewData["EventType"] = new SelectList(_context.EventType, "EventTypeId", "Name", @event.EventType);
             return View(@event);
         }
 
@@ -119,7 +119,7 @@ namespace CloudDevPOE.Controllers
             @event.EndDate = @event.EndDate.ToLocalTime();
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
-            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
+            ViewData["EventType"] = new SelectList(_context.EventType, "EventTypeId", "Name", @event.EventTypeId);
             return View(@event);
         }
 
@@ -169,7 +169,7 @@ namespace CloudDevPOE.Controllers
             }
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name", @event.VenueId);
-            ViewData["EventTypeId"] = new SelectList(_context.EventType, "EventTypeId", "Description", @event.EventTypeId);
+            ViewData["EventType"] = new SelectList(_context.EventType, "EventTypeId", "Name", @event.EventTypeId);
             return View(@event);
         }
 
@@ -217,32 +217,40 @@ namespace CloudDevPOE.Controllers
         }
 
         // ?? GET: Events/Filter
-        public async Task<IActionResult> Filter(int? eventTypeId, DateTime? startDate, DateTime? endDate)
+        public async Task<IActionResult> Filter(string? filterName, int? filterEventType, DateTime? filterStartDate, DateTime? filterEndDate)
         {
             var query = _context.Event
                 .Include(e => e.EventType)
                 .Include(e => e.Venue)
                 .Where(e => e.Venue.IsAvailable);
 
-            if (eventTypeId.HasValue)
-                query = query.Where(e => e.EventTypeId == eventTypeId);
+            if (!string.IsNullOrWhiteSpace(filterName))
+                query = query.Where(e => e.Name.Contains(filterName));
 
-            if (startDate.HasValue)
-                query = query.Where(e => e.StartDate >= startDate);
+            if (filterEventType.HasValue)
+                query = query.Where(e => e.EventTypeId == filterEventType);
 
-            if (endDate.HasValue)
-                query = query.Where(e => e.EndDate <= endDate);
+            if (filterStartDate.HasValue && filterEndDate.HasValue)
+                query = query.Where(e => e.StartDate >= filterStartDate && e.EndDate <= filterEndDate);
 
             var filteredEvents = await query.ToListAsync();
 
-            filteredEvents.ForEach(e =>
-            {
-                e.StartDate = e.StartDate.ToLocalTime();
-                e.EndDate = e.EndDate.ToLocalTime();
-            });
+            // filteredEvents.ForEach(e =>
+            // {
+            //     e.StartDate = e.StartDate.ToLocalTime();
+            //     e.EndDate = e.EndDate.ToLocalTime();
+            // });
 
-            ViewData["EventTypes"] = new SelectList(await _context.EventType.ToListAsync(), "EventTypeId", "Description");
+            ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name");
+            ViewData["FilterEventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
+
             return View("Index", filteredEvents);
+        }
+
+        public async Task<IActionResult> ClearFilter()
+        {
+            // Clear the filter parameters and redirect to Index
+            return await Task.FromResult(RedirectToAction(nameof(Index)));
         }
 
         private bool EventExists(int id)
