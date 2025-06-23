@@ -235,11 +235,6 @@ namespace CloudDevPOE.Controllers
 
             var filteredEvents = await query.ToListAsync();
 
-            // filteredEvents.ForEach(e =>
-            // {
-            //     e.StartDate = e.StartDate.ToLocalTime();
-            //     e.EndDate = e.EndDate.ToLocalTime();
-            // });
 
             ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "Name");
             ViewData["FilterEventType"] = new SelectList(_context.EventType, "EventTypeId", "Name");
