@@ -1,10 +1,26 @@
 @model IEnumerable<CloudDevPOE.Models.Event>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Events";
 }
 
-<h1>Index</h1>
+<h1>Events</h1>
+<!-- Search Function -->
+<div style="background-color: #f8f9fa; padding: 10px; margin-bottom: 20px; width: 100%;">
+    <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+        <form asp-action="Filter" method="get" style="display: flex; align-items: center; gap: 10px;">
+            @Html.TextBox("FilterName", null, new { @class = "form-control", style = "max-width:20em", placeholder = "Event Name" })
+            <label> type </label>
+            @Html.DropDownList("FilterEventType", "All")
+            @Html.TextBox("FilterStartDate", null, new { @class = "form-control", type = "date", style = "max-width:8em", placeholder = "Start Date" })
+            @Html.TextBox("FilterEndDate", null, new { @class = "form-control", type = "date", style = "max-width:8em", placeholder = "End Date" })
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+        <form asp-action="ClearFilter" method="get">
+            <button type="submit" class="btn btn-primary">Clear</button>
+        </form>
+    </div>
+</div>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -27,33 +43,40 @@
             <th>
                 @Html.DisplayNameFor(model => model.Venue)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EventTypeId)
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Venue.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.EventId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.EventId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.EventId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venue.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EventType.Name)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.EventId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.EventId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.EventId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

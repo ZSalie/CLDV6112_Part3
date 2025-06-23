@@ -4,6 +4,7 @@ using CloudDevPOE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudDevPOE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250622181333_FixedEventTypeField")]
+    partial class FixedEventTypeField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,7 +101,7 @@ namespace CloudDevPOE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventTypeId"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -106,43 +109,6 @@ namespace CloudDevPOE.Migrations
                     b.HasKey("EventTypeId");
 
                     b.ToTable("EventType");
-
-                    b.HasData(
-                        new
-                        {
-                            EventTypeId = 1,
-                            Name = "Comedy"
-                        },
-                        new
-                        {
-                            EventTypeId = 2,
-                            Name = "Concert"
-                        },
-                        new
-                        {
-                            EventTypeId = 3,
-                            Name = "Conference"
-                        },
-                        new
-                        {
-                            EventTypeId = 4,
-                            Name = "eSports"
-                        },
-                        new
-                        {
-                            EventTypeId = 5,
-                            Name = "Sports"
-                        },
-                        new
-                        {
-                            EventTypeId = 6,
-                            Name = "Theater"
-                        },
-                        new
-                        {
-                            EventTypeId = 7,
-                            Name = "Workshop"
-                        });
                 });
 
             modelBuilder.Entity("CloudDevPOE.Models.User", b =>

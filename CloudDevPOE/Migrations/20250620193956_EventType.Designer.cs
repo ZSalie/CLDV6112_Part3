@@ -4,6 +4,7 @@ using CloudDevPOE.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudDevPOE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250620193956_EventType")]
+    partial class EventType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,13 +37,10 @@ namespace CloudDevPOE.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CustomerContact")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("EventId")
                         .HasColumnType("int");
@@ -67,23 +67,22 @@ namespace CloudDevPOE.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EventTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TypeEventTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("VenueId")
                         .HasColumnType("int");
 
                     b.HasKey("EventId");
 
-                    b.HasIndex("EventTypeId");
+                    b.HasIndex("TypeEventTypeId");
 
                     b.HasIndex("VenueId");
 
@@ -98,51 +97,13 @@ namespace CloudDevPOE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventTypeId"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("EventTypeId");
 
                     b.ToTable("EventType");
-
-                    b.HasData(
-                        new
-                        {
-                            EventTypeId = 1,
-                            Name = "Comedy"
-                        },
-                        new
-                        {
-                            EventTypeId = 2,
-                            Name = "Concert"
-                        },
-                        new
-                        {
-                            EventTypeId = 3,
-                            Name = "Conference"
-                        },
-                        new
-                        {
-                            EventTypeId = 4,
-                            Name = "eSports"
-                        },
-                        new
-                        {
-                            EventTypeId = 5,
-                            Name = "Sports"
-                        },
-                        new
-                        {
-                            EventTypeId = 6,
-                            Name = "Theater"
-                        },
-                        new
-                        {
-                            EventTypeId = 7,
-                            Name = "Workshop"
-                        });
                 });
 
             modelBuilder.Entity("CloudDevPOE.Models.User", b =>
@@ -185,9 +146,6 @@ namespace CloudDevPOE.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -216,9 +174,9 @@ namespace CloudDevPOE.Migrations
 
             modelBuilder.Entity("CloudDevPOE.Models.Event", b =>
                 {
-                    b.HasOne("CloudDevPOE.Models.EventType", "EventType")
+                    b.HasOne("CloudDevPOE.Models.EventType", "Type")
                         .WithMany()
-                        .HasForeignKey("EventTypeId")
+                        .HasForeignKey("TypeEventTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -228,7 +186,7 @@ namespace CloudDevPOE.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EventType");
+                    b.Navigation("Type");
 
                     b.Navigation("Venue");
                 });
