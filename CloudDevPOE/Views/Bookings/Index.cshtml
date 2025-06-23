@@ -10,11 +10,13 @@
 <div style="background-color: #f8f9fa; padding: 10px; margin-bottom: 20px; width: 100%;">
     <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
         <form asp-action="Filter" method="get" style="display: flex; align-items: center; gap: 10px;">
-            @Html.TextBox("FilterName", null, new { @class = "form-control", style = "max-width:20em", placeholder = "Event Name" })
+            @Html.TextBox("FilterName", null, new { @class = "form-control", style = "max-width:20em", placeholder = "Customer Name" })
             <label> type </label>
             @Html.DropDownList("FilterEventType", "All")
             @Html.TextBox("FilterStartDate", null, new { @class = "form-control", type = "date", style = "max-width:8em", placeholder = "Start Date" })
             @Html.TextBox("FilterEndDate", null, new { @class = "form-control", type = "date", style = "max-width:8em", placeholder = "End Date" })
+            <label>Has availability</label>
+            @Html.CheckBox("FilterAvailability")
             <button type="submit" class="btn btn-primary">Filter</button>
         </form>
         <form asp-action="ClearFilter" method="get">

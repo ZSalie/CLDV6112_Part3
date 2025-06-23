@@ -181,10 +181,11 @@ namespace CloudDevPOE.Controllers
 
             return View("Index", results);
         }
-        public async Task<IActionResult> Filter(string? filterName, int? filterEventType, DateTime? filterStartDate, DateTime? filterEndDate)
+        public async Task<IActionResult> Filter(string? filterName, int? filterEventType, DateTime? filterStartDate, DateTime? filterEndDate, bool? filterAvailability)
         {
             var query = _context.Booking
                 .Include(b => b.Event)
+                .ThenInclude(e => e.Venue)
                 .AsQueryable();
                 
                
@@ -197,7 +198,44 @@ namespace CloudDevPOE.Controllers
             if (filterStartDate.HasValue && filterEndDate.HasValue)
                 query = query.Where(b => b.BookingDate >= filterStartDate && b.BookingDate <= filterEndDate);
 
+
+
+            //if (filterAvailability.HasValue)
+            //    query = query.Select(
+            //            b => 
+            //            new
+            //            {
+            //                Booking = b,
+            //                Capacity = b.Event!.Venue!.Capacity,
+            //                Count = _context.Set<Booking>().Include(ib => ib.EventId == b.EventId).Count()
+            //            } 
+            //        )
+            //        .Where(x => x.Count < x.Capacity)
+            //        .Select(x => x.Booking);
+
+            if (filterAvailability.HasValue)
+                query = query.Select(b => new
+                {
+                    BookingCount = _context.Booking.Count(x => x.EventId == b.EventId),
+                    Capacity = b.Event!.Venue!.Capacity,
+                    Booking = b
+                })
+                    .Where(x => x.BookingCount < x.Capacity)
+                    .Select(x => x.Booking)
+                    .AsQueryable<Booking>();
+                    
+
+
             var filteredBookings = await query.ToListAsync();
+
+            //if (filterAvailability.HasValue)
+            //{
+            //    filteredBookings = filteredBookings.ForEach(async b =>
+            //    {
+            //        count = await _context.Booking.CountAsync(ib => ib.EventId == b.EventId),
+
+            //    })
+            //}
 
             // filteredEvents.ForEach(e =>
             // {
